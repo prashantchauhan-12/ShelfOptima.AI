@@ -1,7 +1,5 @@
 # 🧠 ShelfOptima AI — Shelf Space Optimization System
 
-> **Hackathon Winner — 3rd Prize 🏆**
-
 ShelfOptima is a full-stack AI-powered system built to help retailers intelligently optimize their shelf space allocation. By analyzing profit margins, sales velocity, and historical trends, the system uses a Neural Network to score items and suggest optimal display real-estate percentages.
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue?logo=python)
@@ -88,8 +86,7 @@ shelf-space-optimizer/
 
 ## 📌 My Contribution
 
-My primary focus during the hackathon was the **Full-Stack API Integration and Frontend Experience**. While a teammate handled the TensorFlow architecture and weight tuning, my responsibilities included:
-
+My primary focus was the **Full-Stack API Integration and Frontend Experience**. 
 1. **API Architecture**: Designed and built all 7 Flask endpoints that route frontend requests to the underlying ML and data processing layers.
 2. **Data Preprocessing Engine**: Used Pandas and NumPy to clean incoming sales data, compute feature vectors (margin %, total profit, revenue per unit), and aggregate category-level insights.
 3. **Visualizing Insights**: Created 5 distinct Seaborn/Matplotlib chart types (profit bars, frequency distributions, pie charts, price-cost comparisons, and shelf allocation maps), serialized as Base64 for API delivery.
@@ -124,7 +121,3 @@ Navigate to **`http://localhost:5000`** in your browser.
 The dashboard auto-triggers the ML pipeline on load, processes the seed dataset, and renders all visualizations.
 
 ---
-
-## 📜 License
-
-MIT License — Built for Sinrem Tech Hackathon
