@@ -1,0 +1,7 @@
+Flask
+pymongo
+pandas
+numpy
+seaborn
+matplotlib
+Werkzeug

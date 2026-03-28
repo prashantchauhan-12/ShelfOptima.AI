@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShelfOptima AI — Shelf Space Optimization System</title>
+    <meta name="description" content="AI-powered shelf space optimization system for retail stores. Uses TensorFlow, Pandas, and Seaborn for intelligent product placement.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="logo">
+                <div class="logo-icon"><i class="fa-solid fa-cubes-stacked"></i></div>
+                <div>
+                    <h2>ShelfOptima</h2>
+                    <span class="logo-tag">.ai</span>
+                </div>
+            </div>
+
+            <ul class="nav-links">
+                <li class="active" data-view="dashboard"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></li>
+                <li data-view="analytics"><i class="fa-solid fa-chart-line"></i><span>Analytics</span></li>
+                <li data-view="inventory"><i class="fa-solid fa-boxes-stacked"></i><span>Inventory</span></li>
+                <li data-view="add-data"><i class="fa-solid fa-circle-plus"></i><span>Add Data</span></li>
+                <li data-view="trends"><i class="fa-solid fa-arrow-trend-up"></i><span>Trends</span></li>
+                <li data-view="logs"><i class="fa-solid fa-terminal"></i><span>System Logs</span></li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <div class="system-badge">
+                    <span class="pulse-dot"></span>
+                    <span>System Online</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main -->
+        <main class="content">
+            <header id="main-header">
+                <div class="header-left">
+                    <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('collapsed')">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div>
+                        <h1 id="page-title">Dashboard</h1>
+                        <p id="page-subtitle">Real-time ML predictions & shelf space optimization</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="search-bar">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="global-search" placeholder="Search products..." oninput="handleSearch(this.value)">
+                        <div id="search-dropdown" class="search-dropdown hidden"></div>
+                    </div>
+                    <button class="btn-export" onclick="exportCSV()"><i class="fa-solid fa-download"></i> Export</button>
+                    <div class="user-profile">
+                        <img src="https://i.pravatar.cc/150?img=11" alt="Manager">
+                        <div>
+                            <span class="user-name">Store Manager</span>
+                            <span class="user-role">Admin</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ============ DASHBOARD VIEW ============ -->
+            <section class="view-section" id="dashboard-view">
+                <!-- KPI Row -->
+                <div class="kpi-grid" id="kpi-grid">
+                    <div class="kpi-card kpi-revenue">
+                        <div class="kpi-icon"><i class="fa-solid fa-dollar-sign"></i></div>
+                        <div class="kpi-body">
+                            <p class="kpi-label">Total Revenue</p>
+                            <h2 class="kpi-value" id="kpi-revenue">—</h2>
+                        </div>
+                        <div class="kpi-sparkline"></div>
+                    </div>
+                    <div class="kpi-card kpi-profit">
+                        <div class="kpi-icon"><i class="fa-solid fa-sack-dollar"></i></div>
+                        <div class="kpi-body">
+                            <p class="kpi-label">Total Profit</p>
+                            <h2 class="kpi-value" id="kpi-profit">—</h2>
+                        </div>
+                    </div>
+                    <div class="kpi-card kpi-units">
+                        <div class="kpi-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                        <div class="kpi-body">
+                            <p class="kpi-label">Units Sold</p>
+                            <h2 class="kpi-value" id="kpi-units">—</h2>
+                        </div>
+                    </div>
+                    <div class="kpi-card kpi-margin">
+                        <div class="kpi-icon"><i class="fa-solid fa-percent"></i></div>
+                        <div class="kpi-body">
+                            <p class="kpi-label">Avg Margin</p>
+                            <h2 class="kpi-value" id="kpi-margin">—</h2>
+                        </div>
+                    </div>
+                    <div class="kpi-card kpi-top">
+                        <div class="kpi-icon"><i class="fa-solid fa-trophy"></i></div>
+                        <div class="kpi-body">
+                            <p class="kpi-label">Top Product</p>
+                            <h2 class="kpi-value kpi-value-sm" id="kpi-top">—</h2>
+                        </div>
+                    </div>
+                    <div class="kpi-card kpi-diversity">
+                        <div class="kpi-icon"><i class="fa-solid fa-diagram-project"></i></div>
+                        <div class="kpi-body">
+                            <p class="kpi-label">Diversity Score</p>
+                            <h2 class="kpi-value" id="kpi-diversity">—</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pipeline Controls -->
+                <div class="pipeline-controls">
+                    <div class="pipeline-info">
+                        <div class="pipeline-chip"><i class="fa-solid fa-robot"></i> TF Model: <b>Active</b></div>
+                        <div class="pipeline-chip"><i class="fa-solid fa-database"></i> DB: <b id="db-type-label">Checking...</b></div>
+                        <div class="pipeline-chip"><i class="fa-solid fa-layer-group"></i> Products: <b id="product-count-label">—</b></div>
+                    </div>
+                    <button class="btn-primary btn-glow" onclick="runPipeline()" id="run-btn">
+                        <i class="fa-solid fa-bolt"></i> Run ML Pipeline
+                    </button>
+                </div>
+
+                <!-- Loader -->
+                <div id="loader" class="hidden">
+                    <div class="loader-ring"><div></div><div></div><div></div><div></div></div>
+                    <p>Processing data via TensorFlow architecture...</p>
+                    <div class="loader-steps" id="loader-steps"></div>
+                </div>
+
+                <!-- Shelf Allocation Map -->
+                <div id="shelf-map-section" class="hidden">
+                    <div class="card full-width-card">
+                        <h3><i class="fa-solid fa-ruler-combined"></i> Optimal Shelf Space Allocation Map</h3>
+                        <p class="card-subtitle">Visual shelf-space distribution computed by the neural network</p>
+                        <img id="shelf-map-chart" alt="Shelf allocation map">
+                    </div>
+                </div>
+
+                <!-- Predictions Table -->
+                <div id="predictions-section" class="hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-brain"></i> AI Shelf Space Predictions</h3>
+                            <div class="card-actions">
+                                <select id="filter-priority" onchange="filterPredictions()">
+                                    <option value="ALL">All Priorities</option>
+                                    <option value="HIGH">HIGH</option>
+                                    <option value="MEDIUM">MEDIUM</option>
+                                    <option value="LOW">LOW</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table id="predictions-table">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Product</th>
+                                        <th>Category</th>
+                                        <th>Location</th>
+                                        <th>Units Sold</th>
+                                        <th>Profit</th>
+                                        <th>Margin</th>
+                                        <th>Space %</th>
+                                        <th>Priority</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============ ANALYTICS VIEW ============ -->
+            <section class="view-section hidden" id="analytics-view">
+                <div class="charts-grid" id="charts-grid">
+                    <div class="card viz-card">
+                        <h3><i class="fa-solid fa-chart-bar"></i> Profitability Index</h3>
+                        <img id="profit-chart" alt="Profit Chart">
+                    </div>
+                    <div class="card viz-card">
+                        <h3><i class="fa-solid fa-chart-area"></i> Sales Frequency</h3>
+                        <img id="freq-chart" alt="Frequency Chart">
+                    </div>
+                    <div class="card viz-card">
+                        <h3><i class="fa-solid fa-chart-pie"></i> Category Revenue Share</h3>
+                        <img id="category-pie-chart" alt="Category Pie">
+                    </div>
+                    <div class="card viz-card">
+                        <h3><i class="fa-solid fa-scale-balanced"></i> Price vs Cost</h3>
+                        <img id="margin-chart" alt="Margin Chart">
+                    </div>
+                </div>
+
+                <!-- Category Summary Table -->
+                <div class="card" id="category-summary-card">
+                    <h3><i class="fa-solid fa-table"></i> Category Performance Summary</h3>
+                    <div class="table-container">
+                        <table id="category-table">
+                            <thead><tr><th>Category</th><th>Products</th><th>Total Units</th><th>Revenue</th><th>Profit</th><th>Avg Margin %</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============ INVENTORY VIEW ============ -->
+            <section class="view-section hidden" id="inventory-view">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-warehouse"></i> Product Inventory</h3>
+                        <input type="text" class="inline-search" id="inv-search" placeholder="Filter inventory..." oninput="filterInventory(this.value)">
+                    </div>
+                    <div class="table-container">
+                        <table id="inventory-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th><th>Name</th><th>Category</th><th>Qty</th><th>Price</th><th>Cost</th><th>Supplier</th><th>Location</th><th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============ ADD DATA VIEW ============ -->
+            <section class="view-section hidden" id="add-data-view">
+                <div class="card form-card">
+                    <h2><i class="fa-solid fa-circle-plus"></i> Ingest New POS Data</h2>
+                    <p class="card-subtitle">Data is stored in MongoDB and available for the next ML training cycle</p>
+                    <form id="sales-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Item ID</label>
+                                <input type="text" id="f_item_id" placeholder="P021" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Product Name</label>
+                                <input type="text" id="f_name" placeholder="Organic Juice" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select id="f_category">
+                                    <option value="Beverage">Beverage</option>
+                                    <option value="Snacks">Snacks</option>
+                                    <option value="Breakfast">Breakfast</option>
+                                    <option value="Dairy">Dairy</option>
+                                    <option value="Bakery">Bakery</option>
+                                    <option value="Produce">Produce</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Supplier</label>
+                                <input type="text" id="f_supplier" placeholder="SupplierCo">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Quantity Sold</label>
+                                <input type="number" id="f_qty" placeholder="150" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Sale Price ($)</label>
+                                <input type="number" step="0.01" id="f_price" placeholder="5.99" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Cost Price ($)</label>
+                                <input type="number" step="0.01" id="f_cost" placeholder="2.50" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Shelf Location</label>
+                                <input type="text" id="f_location" placeholder="A7">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Submit to MongoDB</button>
+                        <p id="form-msg"></p>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ============ TRENDS VIEW ============ -->
+            <section class="view-section hidden" id="trends-view">
+                <div class="card">
+                    <h3><i class="fa-solid fa-arrow-trend-up"></i> 30-Day Revenue Trend</h3>
+                    <p class="card-subtitle">Historical daily revenue segmented by category</p>
+                    <canvas id="trend-canvas" height="350"></canvas>
+                </div>
+            </section>
+
+            <!-- ============ LOGS VIEW ============ -->
+            <section class="view-section hidden" id="logs-view">
+                <div class="card terminal-card">
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+                        </div>
+                        <span class="terminal-title">system.log — ShelfOptima AI</span>
+                        <button class="btn-clear-logs" onclick="clearLogs()">Clear</button>
+                    </div>
+                    <pre id="system-logs">System initialized...
+Awaiting pipeline trigger.</pre>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
